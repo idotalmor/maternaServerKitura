@@ -2,7 +2,7 @@ public protocol MaternaAPI {
   
     func addUser(id: String, permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String, completion: @escaping (UserItem?, Error?) -> Void)
     
-    func loginUserm(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
+    func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
   // MARK: - Trucks
   // Get all Food Trucks
   func getAllTrucks(completion: @escaping ([MaternaItem]?, Error?) -> Void)

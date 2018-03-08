@@ -26,6 +26,8 @@ public final class MaternaController {
     router.post("\(usersPath)/signup", handler : addUser)
     router.post("\(usersPath)/login", handler : loginUser)
     
+    //transactionhandler
+    
     // Food Truck Handling
     // All Trucks
     router.get(trucksPath, handler: getTrucks)
@@ -75,7 +77,7 @@ public final class MaternaController {
                 let inputphonenumber: String = json["phonenumber"].stringValue
                 let inputpassword: String = json["Password"].stringValue
         
-        trucks.loginUserm(docId: inputphonenumber) { (truck, err) in
+        trucks.loginUser(docId: inputphonenumber) { (truck, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()

@@ -19,11 +19,7 @@ public enum APICollectionError: Error {
 
 public class Materna: MaternaAPI {
 
-    
-    
 
-    
-  
   static let defaultDBHost = "localhost"
   static let defaultDBPort = UInt16(5984)
   static let defaultDBName = "maternaapi"
@@ -31,7 +27,8 @@ public class Materna: MaternaAPI {
   static let defaultPassword = "123456"
   
   let dbName = "maternaapi"
-  let designName = "maternadesign"
+    let dbNameUsers = "users"
+    let designName = "maternadesign"
   let connectionProps: ConnectionProperties
   
   public init(database: String = Materna.defaultDBName, host: String = Materna.defaultDBHost, port: UInt16 = Materna.defaultDBPort, username: String? = Materna.defaultUsername, password: String? = Materna.defaultPassword) {
@@ -183,10 +180,12 @@ public class Materna: MaternaAPI {
       completion(truckItem, nil)
     }
   }
-
-    public func loginUserm(docId: String, completion: @escaping (UserItem?, Error?) -> Void){
+//------------Materna
+    //credentials
+    //login
+    public func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void){
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
-        let database = couchClient.database("users")
+        let database = couchClient.database(dbNameUsers)
         
         database.retrieve(docId) { (doc, err) in
             guard let doc = doc,
@@ -220,7 +219,7 @@ public class Materna: MaternaAPI {
         ]
         
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
-        let database = couchClient.database("users")
+        let database = couchClient.database(dbNameUsers)
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
