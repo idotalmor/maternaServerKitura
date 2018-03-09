@@ -11,6 +11,8 @@ public final class MaternaController {
   public let trucksPath = "api/v1/trucks"
   public let reviewsPath = "api/v1/reviews"
     public let usersPath = "api/v1/users"
+    public let transactionsPath = "api/v1/transactions"
+
   
   public init(backend: MaternaAPI) {
     self.trucks = backend
@@ -27,6 +29,7 @@ public final class MaternaController {
     router.post("\(usersPath)/login", handler : loginUser)
     
     //transactionhandler
+    router.post("\(transactionsPath)/add", handler: addTransaction)
     
     // Food Truck Handling
     // All Trucks
@@ -140,7 +143,7 @@ public final class MaternaController {
             return
         }
         
-        trucks.addUser(id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (truck, err) in
+        trucks.addUser(id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (user, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()
@@ -148,14 +151,13 @@ public final class MaternaController {
                     return
                 }
                 
-                guard let truck = truck else {
+                guard let user = user else {
                     try response.status(.internalServerError).end()
-                    Log.error("Truck not found")
+                    Log.error("user not found")
                     return
                 }
                 
-                let result = JSON(truck.toDict())
-                Log.info("\(name) added to Vehicle list")
+                let result = JSON(user.toDict())
                 do {
                     try response.status(.OK).send(json: result).end()
                 } catch {
@@ -166,6 +168,89 @@ public final class MaternaController {
             }
         }
     }
+    
+    //transactions
+
+    private func addTransaction(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+
+        let status: String = json["status"].stringValue
+        let locationA: String = json["locationA"].stringValue
+        let locationAString: String = json["locationAString"].stringValue
+        let locationAtime: String = json["locationAtime"].stringValue
+        let locationAdeliveryguy: String = json["locationAdeliveryguy"].stringValue
+        let warehouse: String = json["warehouse"].stringValue
+        let locationB: String = json["locationB"].stringValue
+        let locationBString: String = json["locationBString"].stringValue
+        let locationBtime: String = json["locationBtime"].stringValue
+        let locationBdeliveryguy: String = json["locationBdeliveryguy"].stringValue
+        let product: String = json["product"].stringValue
+        let expirationdate: String = json["expirationdate"].stringValue
+        let warehouseguy: String = json["warehouseguy"].stringValue
+
+        trucks.addTransaction(status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy) { (transaction, err) in
+            do {
+                                guard err == nil else {
+                                    try response.status(.badRequest).end()
+                                    Log.error(err.debugDescription)
+                                    return
+                                }
+
+                                guard let transaction = transaction else {
+                                    try response.status(.internalServerError).end()
+                                    Log.error("transaction not found")
+                                    return
+                                }
+
+                                let result = JSON(transaction.toDict())
+                                Log.info("\(transaction.docId) added to transactions list")
+                                do {
+                                    try response.status(.OK).send(json: result).end()
+                                } catch {
+                                    Log.error("Error sending response")
+                                }
+                            } catch {
+                                Log.error("Communications error")
+                            }
+                        }
+        }
+//        trucks.addUser(id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (truck, err) in
+//            do {
+//                guard err == nil else {
+//                    try response.status(.badRequest).end()
+//                    Log.error(err.debugDescription)
+//                    return
+//                }
+//
+//                guard let truck = truck else {
+//                    try response.status(.internalServerError).end()
+//                    Log.error("Truck not found")
+//                    return
+//                }
+//
+//                let result = JSON(truck.toDict())
+//                Log.info("\(name) added to Vehicle list")
+//                do {
+//                    try response.status(.OK).send(json: result).end()
+//                } catch {
+//                    Log.error("Error sending response")
+//                }
+//            } catch {
+//                Log.error("Communications error")
+//            }
+//        }
+    //}
+    
     
     //#######
   private func getTrucks(request: RouterRequest, response: RouterResponse, next: () -> Void) {

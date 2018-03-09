@@ -18,8 +18,7 @@ public enum APICollectionError: Error {
 }
 
 public class Materna: MaternaAPI {
-
-
+    
   static let defaultDBHost = "localhost"
   static let defaultDBPort = UInt16(5984)
   static let defaultDBName = "maternaapi"
@@ -28,6 +27,7 @@ public class Materna: MaternaAPI {
   
   let dbName = "maternaapi"
     let dbNameUsers = "users"
+    let dbNameTransactions = "transactions"
     let designName = "maternadesign"
   let connectionProps: ConnectionProperties
   
@@ -207,7 +207,6 @@ public class Materna: MaternaAPI {
     //Add User
     public func addUser(id: String, permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String, completion: @escaping (UserItem?, Error?) -> Void) {
         let json: [String:Any] = [
-            "type": "User",
             "_id": id,
             "permission": permission,
             "phonenumber": phonenumber,
@@ -223,8 +222,40 @@ public class Materna: MaternaAPI {
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
-                let truckItem = UserItem(docId: id, id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail)
-                completion(truckItem, nil)
+                let User = UserItem(docId: id, id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail)
+                completion(User, nil)
+            } else {
+                completion(nil, err)
+            }
+        }
+    }
+    
+    //Add Transaction
+    public func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, completion: @escaping (TransactionItem?, Error?) -> Void) {
+        
+        let json: [String:Any] = [
+            "status": status,
+            "locationA": locationA,
+            "locationAString": locationAString,
+            "locationAtime": locationAtime,
+            "locationAdeliveryguy": locationAdeliveryguy,
+            "warehouse": warehouse,
+            "locationB": locationB,
+            "locationBString": locationBString,
+            "locationBtime": locationBtime,
+            "locationBdeliveryguy": locationBdeliveryguy,
+            "product": product,
+            "expirationdate": expirationdate,
+            "warehouseguy": warehouseguy
+        ]
+        
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.create(JSON(json)) { (id, rev, doc, err) in
+            if let id = id {
+                let transaction = TransactionItem(docId: id, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy)
+                completion(transaction, nil)
             } else {
                 completion(nil, err)
             }
@@ -447,7 +478,6 @@ public class Materna: MaternaAPI {
   public func getReview(docId: String, completion: @escaping (ReviewItem?, Error?) -> Void) {
     let couchClient = CouchDBClient(connectionProperties: connectionProps)
     let database = couchClient.database(dbName)
-    
     database.retrieve(docId) { (doc, err) in
       guard let doc = doc else {
         completion(nil, err)

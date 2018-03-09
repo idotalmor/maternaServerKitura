@@ -3,6 +3,10 @@ public protocol MaternaAPI {
     func addUser(id: String, permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String, completion: @escaping (UserItem?, Error?) -> Void)
     
     func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
+    
+    //transactions
+    func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, completion: @escaping (TransactionItem?, Error?) -> Void)
+
   // MARK: - Trucks
   // Get all Food Trucks
   func getAllTrucks(completion: @escaping ([MaternaItem]?, Error?) -> Void)
