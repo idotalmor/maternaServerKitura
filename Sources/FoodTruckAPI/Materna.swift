@@ -230,6 +230,86 @@ public class Materna: MaternaAPI {
         }
     }
     
+    //login test
+    
+//    function(doc) {
+//    if (doc.Password){
+//    emit(doc.Password, [doc.phonenumber,doc.Password]);
+//    }
+//}
+    public func logintest(phonenumber : String, Password: String, completion: @escaping ([ReviewItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameUsers)
+        
+        database.queryByView("login", ofDesign: "users", usingParameters: [.keys(["890" as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let reviews = try self.parseuser(doc)
+                    completion(reviews, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+    func parseuser(_ document: JSON) throws -> [ReviewItem] {
+        guard let rows = document["rows"].array else {
+            throw APICollectionError.ParseError
+        }
+        
+        let reviews: [ReviewItem] = rows.flatMap {
+            let doc = $0["value"]
+//            guard let id = doc[0].string,
+//                let truckId = doc[1].string
+//
+//                else {
+//                    return nil
+//            }
+            let id = doc[0].string
+            let truckId = doc[1].string
+            let reviewTitle = "doc[2].string"
+            let reviewText = "doc[3].string"
+            let starRating = 3
+            return ReviewItem(docId: id!, truckId: truckId!, title: reviewTitle, reviewText: reviewText, starRating: starRating)
+        }
+        return reviews
+    }
+    
+    func parseReviewsss(_ document: JSON) throws -> [ReviewItem] {
+        guard let rows = document["rows"].array else {
+            throw APICollectionError.ParseError
+        }
+        
+        let reviews: [ReviewItem] = rows.flatMap {
+            let doc = $0["value"]
+            guard let id = doc[0].string,
+                let truckId = doc[1].string,
+                let reviewTitle = doc[2].string,
+                let reviewText = doc[3].string,
+                let starRating = doc[4].int else {
+                    return nil
+            }
+            return ReviewItem(docId: id, truckId: truckId, title: reviewTitle, reviewText: reviewText, starRating: starRating)
+        }
+        return reviews
+    }
+    
+    func getIdtest(_ document: JSON) throws -> [(String, String)] {
+        guard let rows = document["rows"].array else {
+            throw APICollectionError.ParseError
+        }
+        
+        return rows.flatMap {
+            let doc = $0["value"]
+            let phonenumber = doc["phonenumber"].stringValue
+            let Password = doc["Password"].stringValue
+            return (phonenumber, Password)
+        }
+    }
+    
+
     //Add Transaction
     public func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, completion: @escaping (TransactionItem?, Error?) -> Void) {
         

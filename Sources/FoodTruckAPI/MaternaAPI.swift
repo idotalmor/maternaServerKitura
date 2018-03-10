@@ -4,6 +4,7 @@ public protocol MaternaAPI {
     
     func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
     
+    func logintest(phonenumber : String, Password: String, completion: @escaping ([ReviewItem]?, Error?) -> Void)
     //transactions
     func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, completion: @escaping (TransactionItem?, Error?) -> Void)
 

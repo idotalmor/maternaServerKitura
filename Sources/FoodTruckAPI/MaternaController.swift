@@ -27,6 +27,8 @@ public final class MaternaController {
     //user handler
     router.post("\(usersPath)/signup", handler : addUser)
     router.post("\(usersPath)/login", handler : loginUser)
+    router.post("\(usersPath)/search", handler : logintest)
+
     
     //transactionhandler
     router.post("\(transactionsPath)/add", handler: addTransaction)
@@ -224,32 +226,44 @@ public final class MaternaController {
                             }
                         }
         }
-//        trucks.addUser(id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (truck, err) in
-//            do {
-//                guard err == nil else {
-//                    try response.status(.badRequest).end()
-//                    Log.error(err.debugDescription)
-//                    return
-//                }
-//
-//                guard let truck = truck else {
-//                    try response.status(.internalServerError).end()
-//                    Log.error("Truck not found")
-//                    return
-//                }
-//
-//                let result = JSON(truck.toDict())
-//                Log.info("\(name) added to Vehicle list")
-//                do {
-//                    try response.status(.OK).send(json: result).end()
-//                } catch {
-//                    Log.error("Error sending response")
-//                }
-//            } catch {
-//                Log.error("Communications error")
-//            }
-//        }
-    //}
+//test
+    
+    private func logintest(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let phonenumber: String = json["phonenumber"].stringValue
+        let Password: String = json["Password"].stringValue
+        
+        trucks.logintest(phonenumber : "00", Password: "00") { (review, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let review = review {
+                    let result = JSON(review.toDict())
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
     
     
     //#######
