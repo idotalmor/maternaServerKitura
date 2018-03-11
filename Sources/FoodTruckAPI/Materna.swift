@@ -237,11 +237,17 @@ public class Materna: MaternaAPI {
 //    emit(doc.Password, [doc.phonenumber,doc.Password]);
 //    }
 //}
+    
+//    function(doc) {
+//    if (doc.phonenumber && doc.Password){
+//    emit([doc.Password,doc.phonenumber], [doc.phonenumber,doc.type]);
+//    }
+//    } 
     public func logintest(phonenumber : String, Password: String, completion: @escaping ([ReviewItem]?, Error?) -> Void) {
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
         let database = couchClient.database(dbNameUsers)
         
-        database.queryByView("login", ofDesign: "users", usingParameters: [.keys(["890" as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+        database.queryByView("login", ofDesign: "users", usingParameters: [.keys([["2","2"] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
             if let doc = doc, err == nil {
                 do {
                     let reviews = try self.parseuser(doc)
