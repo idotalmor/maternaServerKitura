@@ -317,7 +317,7 @@ public class Materna: MaternaAPI {
     
 
     //Add Transaction
-    public func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, completion: @escaping (TransactionItem?, Error?) -> Void) {
+    public func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String,senderuid: String, senderphonenumber: String, sendername: String, receiveruid: String, receiverphonenumber: String, receivername: String, completion: @escaping (TransactionItem?, Error?) -> Void) {
         
         let json: [String:Any] = [
             "status": status,
@@ -332,7 +332,13 @@ public class Materna: MaternaAPI {
             "locationBdeliveryguy": locationBdeliveryguy,
             "product": product,
             "expirationdate": expirationdate,
-            "warehouseguy": warehouseguy
+            "warehouseguy": warehouseguy,
+            "senderuid": senderuid,
+            "senderphonenumber": senderphonenumber,
+            "sendername": sendername,
+            "receiveruid": receiveruid,
+            "receiverphonenumber": receiverphonenumber,
+            "receivername": receivername
         ]
         
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
@@ -340,7 +346,7 @@ public class Materna: MaternaAPI {
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
-                let transaction = TransactionItem(docId: id, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy)
+                let transaction = TransactionItem(docId: id, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy,senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername)
                 completion(transaction, nil)
             } else {
                 completion(nil, err)

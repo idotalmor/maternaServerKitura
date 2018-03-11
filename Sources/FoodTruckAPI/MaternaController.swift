@@ -199,8 +199,14 @@ public final class MaternaController {
         let product: String = json["product"].stringValue
         let expirationdate: String = json["expirationdate"].stringValue
         let warehouseguy: String = json["warehouseguy"].stringValue
+        let senderuid: String = json["senderuid"].stringValue
+        let senderphonenumber: String = json["senderphonenumber"].stringValue
+        let sendername: String = json["sendername"].stringValue
+        let receiveruid: String = json["receiveruid"].stringValue
+        let receiverphonenumber: String = json["receiverphonenumber"].stringValue
+        let receivername: String = json["receivername"].stringValue
 
-        trucks.addTransaction(status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy) { (transaction, err) in
+        trucks.addTransaction(status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy, senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername) { (transaction, err) in
             do {
                                 guard err == nil else {
                                     try response.status(.badRequest).end()

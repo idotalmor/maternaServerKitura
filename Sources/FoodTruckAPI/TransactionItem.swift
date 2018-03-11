@@ -23,8 +23,14 @@ public struct TransactionItem {
     public let product: String
     public let expirationdate: String
     public let warehouseguy: String
+    public let senderuid: String
+    public let senderphonenumber: String
+    public let sendername: String
+    public let receiveruid: String
+    public let receiverphonenumber: String
+    public let receivername: String
     
-    public init(docId: String,status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String) {
+    public init(docId: String,status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String, senderuid: String, senderphonenumber: String, sendername: String, receiveruid: String, receiverphonenumber: String, receivername: String) {
         
         self.docId = docId
         self.status = status
@@ -40,6 +46,12 @@ public struct TransactionItem {
         self.product = product
         self.expirationdate = expirationdate
         self.warehouseguy = warehouseguy
+        self.senderuid = senderuid
+        self.senderphonenumber = senderphonenumber
+        self.sendername = sendername
+        self.receiveruid = receiveruid
+        self.receiverphonenumber = receiverphonenumber
+        self.receivername = receivername
     }
 }
 
@@ -58,7 +70,13 @@ extension TransactionItem: Equatable {
         lhs.locationBdeliveryguy == rhs.locationBdeliveryguy &&
         lhs.product == rhs.product &&
         lhs.expirationdate == rhs.expirationdate &&
-        lhs.warehouseguy == rhs.warehouseguy
+        lhs.warehouseguy == rhs.warehouseguy &&
+        lhs.senderuid == rhs.senderuid &&
+        lhs.senderphonenumber == rhs.senderphonenumber &&
+        lhs.sendername == rhs.sendername &&
+        lhs.receiveruid == rhs.receiveruid &&
+        lhs.receiverphonenumber == rhs.receiverphonenumber &&
+        lhs.receivername == rhs.receivername
     }
 }
 
@@ -79,6 +97,12 @@ extension TransactionItem: DictionaryConvertible {
         result["product"] = self.product
         result["expirationdate"] = self.expirationdate
         result["warehouseguy"] = self.warehouseguy
+        result["senderuid"] = self.senderuid
+        result["senderphonenumber"] = self.senderphonenumber
+        result["sendername"] = self.sendername
+        result["receiveruid"] = self.receiveruid
+        result["receiverphonenumber"] = self.receiverphonenumber
+        result["receivername"] = self.receivername
         
         return result
     }
