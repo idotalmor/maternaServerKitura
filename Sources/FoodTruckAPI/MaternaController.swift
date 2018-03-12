@@ -91,8 +91,10 @@ public final class MaternaController {
                     return
                 }
                 if let userArr = userArr {
+                    //convert user array to json
                     let result = JSON(userArr.toDict())
                     
+                    //send json as a response
                     try response.status(.OK).send(json:result).end()
                 } else {
                     Log.warning("Could not find a review by that ID")

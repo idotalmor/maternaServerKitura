@@ -18,10 +18,6 @@ public enum APICollectionError: Error {
 }
 
 public class Materna: MaternaAPI {
-    public func loginretrieveold(docId: String, completion: @escaping (UserItem?, Error?) -> Void) {
-        
-    }
-    
     
   static let defaultDBHost = "localhost"
   static let defaultDBPort = UInt16(5984)
@@ -125,65 +121,7 @@ public class Materna: MaternaAPI {
     }
   }
   
-  public func getAllTrucks(completion: @escaping ([MaternaItem]?, Error?) -> Void) {
-    let couchClient = CouchDBClient(connectionProperties: connectionProps)
-    let database = couchClient.database(dbName)
-    
-    database.queryByView("all_trucks", ofDesign: designName, usingParameters: [.descending(true), .includeDocs(true)]) { doc, err in
-      if let doc = doc, err == nil {
-        do {
-          let trucks = try self.parseTrucks(doc)
-          completion(trucks, nil)
-        } catch {
-          completion(nil, err)
-        }
-      } else {
-        completion(nil, err)
-      }
-    }
-  }
-  
-  func parseTrucks(_ document: JSON) throws -> [MaternaItem] {
-    guard let rows = document["rows"].array else {
-      throw APICollectionError.ParseError
-    }
-    
-    let trucks: [MaternaItem] = rows.flatMap {
-      let doc = $0["value"]
-      guard let id = doc[0].string,
-            let name = doc[1].string,
-            let foodType = doc[2].string,
-            let avgCost = doc[3].float,
-            let latitude = doc[4].float,
-        let longitude = doc[5].float else {
-          return nil
-      }
-      return MaternaItem(docId: id, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude)
-    }
-    return trucks
-  }
-  
-  // Get specific Food Truck
-  public func getTruck(docId: String, completion: @escaping (MaternaItem?, Error?) -> Void){
-    let couchClient = CouchDBClient(connectionProperties: connectionProps)
-    let database = couchClient.database(dbName)
-    
-    database.retrieve(docId) { (doc, err) in
-      guard let doc = doc,
-            let docId = doc["_id"].string,
-            let name = doc["name"].string,
-            let foodType = doc["foodtype"].string,
-            let avgCost = doc["avgcost"].float,
-            let latitude = doc["latitude"].float,
-            let longitude = doc["longitude"].float else {
-        completion(nil, err)
-        return
-      }
-      
-      let truckItem = MaternaItem(docId: docId, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude)
-      completion(truckItem, nil)
-    }
-  }
+
 //------------Materna
     //credentials
     //login
@@ -207,6 +145,23 @@ public class Materna: MaternaAPI {
 //            completion(user, nil)
 //        }
 //    }
+    
+    //samples javascript view code - couchDB
+    
+    //single parameters
+    //    function(doc) {
+    //    if (doc.Password){
+    //    emit(doc.Password, [doc.phonenumber,doc.Password]);
+    //    }
+    //}
+    //multiple parameters
+    //    function(doc) {
+    //    if (doc.phonenumber && doc.Password){
+    //    emit([doc.phonenumber,doc.Password], [doc.phonenumber,doc.type]);
+    //    }
+    //    }
+    
+    
     //Add User
     public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String, completion: @escaping (UserItem?, Error?) -> Void) {
         let json: [String:Any] = [
@@ -232,17 +187,14 @@ public class Materna: MaternaAPI {
         }
     }
     
-    //login test
+    //login
     
-//    function(doc) {
-//    if (doc.Password){
-//    emit(doc.Password, [doc.phonenumber,doc.Password]);
-//    }
-//}
+
     
+    //login func
 //    function(doc) {
 //    if (doc.phonenumber && doc.Password){
-//    emit([doc.phonenumber,doc.Password], [doc.phonenumber,doc.type]);
+//    emit([doc.phonenumber,doc.Password], [doc._id,doc.permission,doc.partneruid,doc.name,doc.mail,doc.phonenumber]);
 //    }
 //    }
     public func loginUser(phonenumber : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void) {
@@ -281,18 +233,6 @@ public class Materna: MaternaAPI {
         return userArr
     }
     
-    func getIdtest(_ document: JSON) throws -> [(String, String)] {
-        guard let rows = document["rows"].array else {
-            throw APICollectionError.ParseError
-        }
-        
-        return rows.flatMap {
-            let doc = $0["value"]
-            let phonenumber = doc["phonenumber"].stringValue
-            let Password = doc["Password"].stringValue
-            return (phonenumber, Password)
-        }
-    }
     
 
     //Add Transaction
@@ -333,7 +273,106 @@ public class Materna: MaternaAPI {
         }
     }
     
+    func parsetransaction(_ document: JSON) throws -> [TransactionItem] {
+        guard let rows = document["rows"].array else {
+            throw APICollectionError.ParseError
+        }
+        
+        let userArr: [TransactionItem] = rows.flatMap {
+            let doc = $0["value"]
+            guard let docId = doc[0].string,
+                let status = doc[1].string,
+                let locationA = doc[2].string,
+                let locationAString = doc[3].string,
+                let locationAtime = doc[4].string,
+                let locationAdeliveryguy = doc[5].string,
+                let warehouse = doc[6].string,
+                let locationB = doc[7].string,
+                let locationBString = doc[3].string,
+                let locationBtime = doc[4].string,
+                let locationBdeliveryguy = doc[5].string,
+                let product = doc[1].string,
+                let expirationdate = doc[2].string,
+                let warehouseguy = doc[3].string,
+                let senderuid = doc[4].string,
+                let senderphonenumber = doc[5].string,
+                let sendername = doc[2].string,
+                let receiveruid = doc[3].string,
+                let receiverphonenumber = doc[4].string,
+                let receivername = doc[5].string
+                else {return nil}
+            return TransactionItem(docId: docId, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy, senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername)
+        }
+        return userArr
+    }
     
+    
+    
+    
+    
+    
+    
+    
+    
+    public func getAllTrucks(completion: @escaping ([MaternaItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbName)
+        
+        database.queryByView("all_trucks", ofDesign: designName, usingParameters: [.descending(true), .includeDocs(true)]) { doc, err in
+            if let doc = doc, err == nil {
+                do {
+                    let trucks = try self.parseTrucks(doc)
+                    completion(trucks, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            } else {
+                completion(nil, err)
+            }
+        }
+    }
+    
+    func parseTrucks(_ document: JSON) throws -> [MaternaItem] {
+        guard let rows = document["rows"].array else {
+            throw APICollectionError.ParseError
+        }
+        
+        let trucks: [MaternaItem] = rows.flatMap {
+            let doc = $0["value"]
+            guard let id = doc[0].string,
+                let name = doc[1].string,
+                let foodType = doc[2].string,
+                let avgCost = doc[3].float,
+                let latitude = doc[4].float,
+                let longitude = doc[5].float else {
+                    return nil
+            }
+            return MaternaItem(docId: id, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude)
+        }
+        return trucks
+    }
+    
+    // Get specific Food Truck
+    public func getTruck(docId: String, completion: @escaping (MaternaItem?, Error?) -> Void){
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbName)
+        
+        database.retrieve(docId) { (doc, err) in
+            guard let doc = doc,
+                let docId = doc["_id"].string,
+                let name = doc["name"].string,
+                let foodType = doc["foodtype"].string,
+                let avgCost = doc["avgcost"].float,
+                let latitude = doc["latitude"].float,
+                let longitude = doc["longitude"].float else {
+                    completion(nil, err)
+                    return
+            }
+            
+            let truckItem = MaternaItem(docId: docId, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude)
+            completion(truckItem, nil)
+        }
+    }
     
     
   // Add Food Truck
