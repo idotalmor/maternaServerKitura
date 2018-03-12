@@ -18,6 +18,8 @@ public enum APICollectionError: Error {
 }
 
 public class Materna: MaternaAPI {
+
+    
     
   static let defaultDBHost = "localhost"
   static let defaultDBPort = UInt16(5984)
@@ -163,14 +165,15 @@ public class Materna: MaternaAPI {
     
     
     //Add User
-    public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String, completion: @escaping (UserItem?, Error?) -> Void) {
+    public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String,warehouse: String?, completion: @escaping (UserItem?, Error?) -> Void) {
         let json: [String:Any] = [
             "permission": permission,
             "phonenumber": phonenumber,
             "Password": Password,
             "name": name,
             "partneruid": partneruid,
-            "mail": mail
+            "mail": mail,
+            "warehouse" : warehouse
             
         ]
         
@@ -179,7 +182,7 @@ public class Materna: MaternaAPI {
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
-                let User = UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail)
+                let User = UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse)
                 completion(User, nil)
             } else {
                 completion(nil, err)
@@ -188,8 +191,6 @@ public class Materna: MaternaAPI {
     }
     
     //login
-    
-
     
     //login func
 //    function(doc) {
@@ -228,7 +229,8 @@ public class Materna: MaternaAPI {
                 let mail = doc[4].string,
                 let phonenumber = doc[5].string
                 else {return nil}
-            return UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail)
+            let warehouse = doc[6].string
+            return UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse)
         }
         return userArr
     }
@@ -270,6 +272,30 @@ public class Materna: MaternaAPI {
             } else {
                 completion(nil, err)
             }
+        }
+    }
+    
+    //query
+    
+    //manager
+    //function (doc) {
+//    emit([doc.warehouse,doc.status], [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//}
+    
+    public func managerStockQuery(warehouse : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameUsers)
+        
+        database.queryByView("login", ofDesign: "users", usingParameters: [.keys([[warehouse,Password] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let userArr = try self.parseuser(doc)
+                    completion(userArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
         }
     }
     

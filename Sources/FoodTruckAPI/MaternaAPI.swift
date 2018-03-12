@@ -1,6 +1,6 @@
 public protocol MaternaAPI {
   
-    func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String, completion: @escaping (UserItem?, Error?) -> Void)
+    func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String,warehouse: String?, completion: @escaping (UserItem?, Error?) -> Void)
     
    // func loginretrieveold(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
     

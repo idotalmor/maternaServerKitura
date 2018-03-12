@@ -127,15 +127,15 @@ public final class MaternaController {
         let name: String = json["name"].stringValue
         let partneruid: String = json["partneruid"].stringValue
         let mail: String = json["mail"].stringValue
+        let warehouse: String = json["warehouse"].stringValue
 
-        
         guard name != "" else {
             response.status(.badRequest)
             Log.error("Necessary fields not supplied")
             return
         }
-        
-        maternaapi.addUser(permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (user, err) in
+
+        maternaapi.addUser(permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse) { (user, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()
