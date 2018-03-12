@@ -18,6 +18,10 @@ public enum APICollectionError: Error {
 }
 
 public class Materna: MaternaAPI {
+    public func loginretrieveold(docId: String, completion: @escaping (UserItem?, Error?) -> Void) {
+        
+    }
+    
     
   static let defaultDBHost = "localhost"
   static let defaultDBPort = UInt16(5984)
@@ -183,31 +187,29 @@ public class Materna: MaternaAPI {
 //------------Materna
     //credentials
     //login
-    public func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void){
-        let couchClient = CouchDBClient(connectionProperties: connectionProps)
-        let database = couchClient.database(dbNameUsers)
-        
-        database.retrieve(docId) { (doc, err) in
-            guard let doc = doc,
-                let id = doc["_id"].string,
-                let permission = doc["permission"].string,
-                let phonenumber = doc["phonenumber"].string,
-                let Password = doc["Password"].string,
-                let name = doc["name"].string,
-                let partneruid = doc["partneruid"].string,
-                let mail = doc["mail"].string else {
-                    completion(nil, err)
-                    return
-            }
-            
-            let user = UserItem(docId: id, id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail)
-            completion(user, nil)
-        }
-    }
+//    public func loginretrieveold(docId: String, completion: @escaping (UserItem?, Error?) -> Void){
+//        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+//        let database = couchClient.database(dbNameUsers)
+//
+//        database.retrieve(docId) { (doc, err) in
+//            guard let doc = doc,
+//                let permission = doc["permission"].string,
+//                let phonenumber = doc["phonenumber"].string,
+//                let Password = doc["Password"].string,
+//                let name = doc["name"].string,
+//                let partneruid = doc["partneruid"].string,
+//                let mail = doc["mail"].string else {
+//                    completion(nil, err)
+//                    return
+//            }
+//
+//            let user = UserItem(docId: docId, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail)
+//            completion(user, nil)
+//        }
+//    }
     //Add User
-    public func addUser(id: String, permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String, completion: @escaping (UserItem?, Error?) -> Void) {
+    public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String, completion: @escaping (UserItem?, Error?) -> Void) {
         let json: [String:Any] = [
-            "_id": id,
             "permission": permission,
             "phonenumber": phonenumber,
             "Password": Password,
@@ -222,7 +224,7 @@ public class Materna: MaternaAPI {
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
-                let User = UserItem(docId: id, id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail)
+                let User = UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail)
                 completion(User, nil)
             } else {
                 completion(nil, err)
@@ -240,18 +242,18 @@ public class Materna: MaternaAPI {
     
 //    function(doc) {
 //    if (doc.phonenumber && doc.Password){
-//    emit([doc.Password,doc.phonenumber], [doc.phonenumber,doc.type]);
+//    emit([doc.phonenumber,doc.Password], [doc.phonenumber,doc.type]);
 //    }
-//    } 
-    public func logintest(phonenumber : String, Password: String, completion: @escaping ([ReviewItem]?, Error?) -> Void) {
+//    }
+    public func loginUser(phonenumber : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void) {
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
         let database = couchClient.database(dbNameUsers)
         
-        database.queryByView("login", ofDesign: "users", usingParameters: [.keys([["2","2"] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+        database.queryByView("login", ofDesign: "users", usingParameters: [.keys([[phonenumber,Password] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
             if let doc = doc, err == nil {
                 do {
-                    let reviews = try self.parseuser(doc)
-                    completion(reviews, nil)
+                    let userArr = try self.parseuser(doc)
+                    completion(userArr, nil)
                 } catch {
                     completion(nil, err)
                 }
@@ -260,46 +262,23 @@ public class Materna: MaternaAPI {
         }
     }
     
-    func parseuser(_ document: JSON) throws -> [ReviewItem] {
+    func parseuser(_ document: JSON) throws -> [UserItem] {
         guard let rows = document["rows"].array else {
             throw APICollectionError.ParseError
         }
         
-        let reviews: [ReviewItem] = rows.flatMap {
-            let doc = $0["value"]
-//            guard let id = doc[0].string,
-//                let truckId = doc[1].string
-//
-//                else {
-//                    return nil
-//            }
-            let id = doc[0].string
-            let truckId = doc[1].string
-            let reviewTitle = "doc[2].string"
-            let reviewText = "doc[3].string"
-            let starRating = 3
-            return ReviewItem(docId: id!, truckId: truckId!, title: reviewTitle, reviewText: reviewText, starRating: starRating)
-        }
-        return reviews
-    }
-    
-    func parseReviewsss(_ document: JSON) throws -> [ReviewItem] {
-        guard let rows = document["rows"].array else {
-            throw APICollectionError.ParseError
-        }
-        
-        let reviews: [ReviewItem] = rows.flatMap {
+        let userArr: [UserItem] = rows.flatMap {
             let doc = $0["value"]
             guard let id = doc[0].string,
-                let truckId = doc[1].string,
-                let reviewTitle = doc[2].string,
-                let reviewText = doc[3].string,
-                let starRating = doc[4].int else {
-                    return nil
-            }
-            return ReviewItem(docId: id, truckId: truckId, title: reviewTitle, reviewText: reviewText, starRating: starRating)
+                let permission = doc[1].string,
+                let partneruid = doc[2].string,
+                let name = doc[3].string,
+                let mail = doc[4].string,
+                let phonenumber = doc[5].string
+                else {return nil}
+            return UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail)
         }
-        return reviews
+        return userArr
     }
     
     func getIdtest(_ document: JSON) throws -> [(String, String)] {

@@ -1,10 +1,10 @@
 public protocol MaternaAPI {
   
-    func addUser(id: String, permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String, completion: @escaping (UserItem?, Error?) -> Void)
+    func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String,mail: String, completion: @escaping (UserItem?, Error?) -> Void)
     
-    func loginUser(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
+    func loginretrieveold(docId: String, completion: @escaping (UserItem?, Error?) -> Void)
     
-    func logintest(phonenumber : String, Password: String, completion: @escaping ([ReviewItem]?, Error?) -> Void)
+    func loginUser(phonenumber : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void)
     //transactions
     func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String,senderuid: String, senderphonenumber: String, sendername: String, receiveruid: String, receiverphonenumber: String, receivername: String, completion: @escaping (TransactionItem?, Error?) -> Void)
 

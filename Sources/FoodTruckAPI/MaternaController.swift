@@ -6,7 +6,7 @@ import LoggerAPI
 import SwiftyJSON
 
 public final class MaternaController {
-  public let trucks: MaternaAPI
+  public let maternaapi: MaternaAPI
   public let router = Router()
   public let trucksPath = "api/v1/trucks"
   public let reviewsPath = "api/v1/reviews"
@@ -15,7 +15,7 @@ public final class MaternaController {
 
   
   public init(backend: MaternaAPI) {
-    self.trucks = backend
+    self.maternaapi = backend
     routeSetup()
   }
   
@@ -27,8 +27,6 @@ public final class MaternaController {
     //user handler
     router.post("\(usersPath)/signup", handler : addUser)
     router.post("\(usersPath)/login", handler : loginUser)
-    router.post("\(usersPath)/search", handler : logintest)
-
     
     //transactionhandler
     router.post("\(transactionsPath)/add", handler: addTransaction)
@@ -66,56 +64,47 @@ public final class MaternaController {
     router.delete("\(reviewsPath)/:id", handler: deleteReviewById)
   }
     
+
+    
+    
     private func loginUser(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
         
-                guard let body = request.body else {
-                    response.status(.badRequest)
-                    Log.error("No body found in request")
-                    return
-                }
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
         
-                guard case let .json(json) = body else {
-                    response.status(.badRequest)
-                    Log.error("Invalid JSON data supplied")
-                    return
-                }
-                let inputphonenumber: String = json["phonenumber"].stringValue
-                let inputpassword: String = json["Password"].stringValue
+        let phonenumber: String = json["phonenumber"].stringValue
+        let Password: String = json["Password"].stringValue
         
-        trucks.loginUser(docId: inputphonenumber) { (truck, err) in
+        maternaapi.loginUser(phonenumber : phonenumber, Password: Password) { (userArr, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()
                     Log.error(err.debugDescription)
                     return
                 }
-                
-                guard let truck = truck else {
-                    try response.status(.internalServerError).end()
-                    Log.error("Truck not found")
+                if let userArr = userArr {
+                    let result = JSON(userArr.toDict())
+                    
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
                     return
                 }
-                
-                let user = JSON(truck.toDict())
-                //let userpassword = user["password"].stringValue
-                
-                if(truck.Password == inputpassword){
-                    do {
-                        try response.status(.OK).send(json: user).end()
-                    } catch {
-                        Log.error("Error sending response")
-                    }
-                }else{
-                    do {
-                        try response.status(.OK).send(json: []).end()
-                    } catch {
-                        Log.error("Error sending response")
-                    }}
             } catch {
-                Log.error("Communications error")
+                Log.error("Communications Error")
             }
         }
     }
+    
     
     private func addUser(request: RouterRequest, response: RouterResponse, next: () -> Void) {
         guard let body = request.body else {
@@ -130,7 +119,6 @@ public final class MaternaController {
             return
         }
         
-        let id: String = json["_id"].stringValue
         let permission: String = json["permission"].stringValue
         let phonenumber: String = json["phonenumber"].stringValue
         let Password: String = json["Password"].stringValue
@@ -145,7 +133,7 @@ public final class MaternaController {
             return
         }
         
-        trucks.addUser(id: id, permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (user, err) in
+        maternaapi.addUser(permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail) { (user, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()
@@ -206,7 +194,7 @@ public final class MaternaController {
         let receiverphonenumber: String = json["receiverphonenumber"].stringValue
         let receivername: String = json["receivername"].stringValue
 
-        trucks.addTransaction(status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy, senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername) { (transaction, err) in
+        maternaapi.addTransaction(status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy, senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername) { (transaction, err) in
             do {
                                 guard err == nil else {
                                     try response.status(.badRequest).end()
@@ -232,49 +220,11 @@ public final class MaternaController {
                             }
                         }
         }
-//test
-    
-    private func logintest(request: RouterRequest, response: RouterResponse, next: () -> Void) {
-        guard let body = request.body else {
-            response.status(.badRequest)
-            Log.error("No body found in request")
-            return
-        }
-        
-        guard case let .json(json) = body else {
-            response.status(.badRequest)
-            Log.error("Invalid JSON data supplied")
-            return
-        }
-        
-        let phonenumber: String = json["phonenumber"].stringValue
-        let Password: String = json["Password"].stringValue
-        
-        trucks.logintest(phonenumber : "00", Password: "00") { (review, err) in
-            do {
-                guard err == nil else {
-                    try response.status(.badRequest).end()
-                    Log.error(err.debugDescription)
-                    return
-                }
-                if let review = review {
-                    let result = JSON(review.toDict())
-                    try response.status(.OK).send(json:result).end()
-                } else {
-                    Log.warning("Could not find a review by that ID")
-                    response.status(.notFound)
-                    return
-                }
-            } catch {
-                Log.error("Communications Error")
-            }
-        }
-    }
-    
+
     
     //#######
   private func getTrucks(request: RouterRequest, response: RouterResponse, next: () -> Void) {
-    trucks.getAllTrucks { (trucks, err) in
+    maternaapi.getAllTrucks { (trucks, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -319,7 +269,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.addTruck(name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude) { (truck, err) in
+    maternaapi.addTruck(name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude) { (truck, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -353,7 +303,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.getTruck(docId: docId) { (truck, err) in
+    maternaapi.getTruck(docId: docId) { (truck, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -382,7 +332,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.deleteTruck(docId: docId) { (err) in
+    maternaapi.deleteTruck(docId: docId) { (err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -422,7 +372,7 @@ public final class MaternaController {
     let latitude: Float? = json["latitude"].floatValue == 0 ? nil : json["latitude"].floatValue
     let longitude: Float? = json["longitude"].floatValue == 0 ? nil : json["longitude"].floatValue
     
-    trucks.updateTruck(docId: docId, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude) { (updatedTruck, err) in
+    maternaapi.updateTruck(docId: docId, name: name, foodType: foodType, avgCost: avgCost, latitude: latitude, longitude: longitude) { (updatedTruck, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -443,7 +393,7 @@ public final class MaternaController {
   }
   
   private func getTruckCount(request: RouterRequest, response: RouterResponse, next: () -> Void) {
-    trucks.countTrucks { (count, err) in
+    maternaapi.countTrucks { (count, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -471,7 +421,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.getReviews(truckId: truckId) { (reviews, err) in
+    maternaapi.getReviews(truckId: truckId) { (reviews, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -500,7 +450,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.getReview(docId: docId) { (review, err) in
+    maternaapi.getReview(docId: docId) { (review, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -551,7 +501,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.addReview(truckId: truckId, reviewTitle: title, reviewText: text, reviewStarRating: starRating) { (review, err) in
+    maternaapi.addReview(truckId: truckId, reviewTitle: title, reviewText: text, reviewStarRating: starRating) { (review, err) in
       
       do {
         guard err == nil else {
@@ -605,7 +555,7 @@ public final class MaternaController {
     let reviewText: String? = json["reviewtext"].stringValue == "" ? nil : json["reviewtext"].stringValue
     let starRating: Int? = json["starrating"].intValue == 0 ? nil : json["starrating"].intValue
     
-    trucks.updateReview(docId: docId, truckId: truckId, reviewTitle: reviewTitle, reviewText: reviewText, starRating: starRating) { (updatedReview, err) in
+    maternaapi.updateReview(docId: docId, truckId: truckId, reviewTitle: reviewTitle, reviewText: reviewText, starRating: starRating) { (updatedReview, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -632,7 +582,7 @@ public final class MaternaController {
       Log.warning("ID Not found in request")
       return
     }
-    trucks.deleteReview(docId: docId) { (err) in
+    maternaapi.deleteReview(docId: docId) { (err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -649,7 +599,7 @@ public final class MaternaController {
   
   // Get count of all reviews
   private func getReviewsCount(request: RouterRequest, response: RouterResponse, next: () -> Void) {
-    trucks.countReviews { (count, err) in
+    maternaapi.countReviews { (count, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -677,7 +627,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.countReviews(truckId: truckId) { (count, err) in
+    maternaapi.countReviews(truckId: truckId) { (count, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -707,7 +657,7 @@ public final class MaternaController {
       return
     }
     
-    trucks.averageRating(truckId: truckId) { (rating, err) in
+    maternaapi.averageRating(truckId: truckId) { (rating, err) in
       do {
         guard err == nil else {
           try response.status(.badRequest).end()
@@ -730,6 +680,59 @@ public final class MaternaController {
   }
 }
 
+
+//old
+
+//    private func loginUser(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+//
+//                guard let body = request.body else {
+//                    response.status(.badRequest)
+//                    Log.error("No body found in request")
+//                    return
+//                }
+//
+//                guard case let .json(json) = body else {
+//                    response.status(.badRequest)
+//                    Log.error("Invalid JSON data supplied")
+//                    return
+//                }
+//                let inputphonenumber: String = json["phonenumber"].stringValue
+//                let inputpassword: String = json["Password"].stringValue
+//
+////        trucks.loginretrieveold(docId: inputphonenumber) { (truck, err) in
+////            do {
+////                guard err == nil else {
+////                    try response.status(.badRequest).end()
+////                    Log.error(err.debugDescription)
+////                    return
+////                }
+////
+////                guard let truck = truck else {
+////                    try response.status(.internalServerError).end()
+////                    Log.error("Truck not found")
+////                    return
+////                }
+////
+////                let user = JSON(truck.toDict())
+////                //let userpassword = user["password"].stringValue
+////
+////                if(truck.Password == inputpassword){
+////                    do {
+////                        try response.status(.OK).send(json: user).end()
+////                    } catch {
+////                        Log.error("Error sending response")
+////                    }
+////                }else{
+////                    do {
+////                        try response.status(.OK).send(json: []).end()
+////                    } catch {
+////                        Log.error("Error sending response")
+////                    }}
+////            } catch {
+////                Log.error("Communications error")
+////            }
+////        }
+//    }
 
 
 
