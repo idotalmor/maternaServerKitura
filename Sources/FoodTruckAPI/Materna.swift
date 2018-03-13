@@ -282,15 +282,15 @@ public class Materna: MaternaAPI {
 //    emit([doc.warehouse,doc.status], [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
 //}
     
-    public func managerStockQuery(warehouse : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void) {
+    public func managerEye(warehouse : String, status: String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
         let couchClient = CouchDBClient(connectionProperties: connectionProps)
-        let database = couchClient.database(dbNameUsers)
+        let database = couchClient.database(dbNameTransactions)
         
-        database.queryByView("login", ofDesign: "users", usingParameters: [.keys([[warehouse,Password] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+        database.queryByView("managerEye", ofDesign: "Manager", usingParameters: [.keys([[warehouse,status] as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
             if let doc = doc, err == nil {
                 do {
-                    let userArr = try self.parseuser(doc)
-                    completion(userArr, nil)
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
                 } catch {
                     completion(nil, err)
                 }
@@ -304,7 +304,7 @@ public class Materna: MaternaAPI {
             throw APICollectionError.ParseError
         }
         
-        let userArr: [TransactionItem] = rows.flatMap {
+        let transactionArr: [TransactionItem] = rows.flatMap {
             let doc = $0["value"]
             guard let docId = doc[0].string,
                 let status = doc[1].string,
@@ -314,28 +314,28 @@ public class Materna: MaternaAPI {
                 let locationAdeliveryguy = doc[5].string,
                 let warehouse = doc[6].string,
                 let locationB = doc[7].string,
-                let locationBString = doc[3].string,
-                let locationBtime = doc[4].string,
-                let locationBdeliveryguy = doc[5].string,
-                let product = doc[1].string,
-                let expirationdate = doc[2].string,
-                let warehouseguy = doc[3].string,
-                let senderuid = doc[4].string,
-                let senderphonenumber = doc[5].string,
-                let sendername = doc[2].string,
-                let receiveruid = doc[3].string,
-                let receiverphonenumber = doc[4].string,
-                let receivername = doc[5].string
+                let locationBString = doc[8].string,
+                let locationBtime = doc[9].string,
+                let locationBdeliveryguy = doc[10].string,
+                let product = doc[11].string,
+                let expirationdate = doc[12].string,
+                let warehouseguy = doc[13].string,
+                let senderuid = doc[14].string,
+                let senderphonenumber = doc[15].string,
+                let sendername = doc[16].string,
+                let receiveruid = doc[17].string,
+                let receiverphonenumber = doc[18].string,
+                let receivername = doc[19].string
                 else {return nil}
             return TransactionItem(docId: docId, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy, senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername)
         }
-        return userArr
+        return transactionArr
     }
     
     
     
     
-    
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     

@@ -31,6 +31,10 @@ public final class MaternaController {
     //transactionhandler
     router.post("\(transactionsPath)/add", handler: addTransaction)
     
+    //manager
+    router.post("\(transactionsPath)/managereye", handler: managerEye)
+
+    
     // Food Truck Handling
     // All Trucks
     router.get(trucksPath, handler: getTrucks)
@@ -223,6 +227,50 @@ public final class MaternaController {
                         }
         }
 
+    //Manager Queries
+    
+    private func managerEye(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let warehouse: String = json["warehouse"].stringValue
+        let status: String = json["status"].stringValue
+        
+        maternaapi.managerEye(warehouse : warehouse, status: status) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    
+    
     
     //#######
   private func getTrucks(request: RouterRequest, response: RouterResponse, next: () -> Void) {
