@@ -275,6 +275,78 @@ public class Materna: MaternaAPI {
         }
     }
     
+    
+    public func updateTransaction(docId: String,status: String?, locationA: String?, locationAString: String?, locationAtime: String?, locationAdeliveryguy: String?, warehouse: String?, locationB: String?, locationBString: String?, locationBtime: String?, locationBdeliveryguy: String?, product: String?, expirationdate: String?, warehouseguy: String?,senderuid: String?, senderphonenumber: String?, sendername: String?, receiveruid: String?, receiverphonenumber: String?, receivername: String?, completion: @escaping (TransactionItem?, Error?) -> Void) {
+        
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.retrieve(docId) { (doc, err) in
+            guard let doc = doc else {
+                completion(nil, APICollectionError.AuthError)
+                return
+            }
+            
+            guard let rev = doc["_rev"].string else {
+                completion(nil, APICollectionError.ParseError)
+                return
+            }
+            
+            let status = status ?? doc["status"].stringValue
+            let locationA = locationA ?? doc["locationA"].stringValue
+            let locationAString = locationAString ?? doc["locationAString"].stringValue
+            let locationAtime = locationAtime ?? doc["locationAtime"].stringValue
+            let locationAdeliveryguy = locationAdeliveryguy ?? doc["locationAdeliveryguy"].stringValue
+            let warehouse = warehouse ?? doc["warehouse"].stringValue
+            let locationB = locationB ?? doc["locationB"].stringValue
+            let locationBString = locationBString ?? doc["locationBString"].stringValue
+            let locationBtime = locationBtime ?? doc["locationBtime"].stringValue
+            let locationBdeliveryguy = locationBdeliveryguy ?? doc["locationBdeliveryguy"].stringValue
+            let product = product ?? doc["product"].stringValue
+            let expirationdate = expirationdate ?? doc["expirationdate"].stringValue
+            let warehouseguy = warehouseguy ?? doc["warehouseguy"].stringValue
+            let senderuid = senderuid ?? doc["senderuid"].stringValue
+            let senderphonenumber = senderphonenumber ?? doc["senderphonenumber"].stringValue
+            let sendername = sendername ?? doc["sendername"].stringValue
+            let receiveruid = receiveruid ?? doc["receiveruid"].stringValue
+            let receiverphonenumber = receiverphonenumber ?? doc["receiverphonenumber"].stringValue
+            let receivername = receivername ?? doc["receivername"].stringValue
+
+            
+            let json: [String: Any] = [
+                "status": status,
+                "locationA": locationA,
+                "locationAString": locationAString,
+                "locationAtime": locationAtime,
+                "locationAdeliveryguy": locationAdeliveryguy,
+                "warehouse": warehouse,
+                "locationB": locationB,
+                "locationBString": locationBString,
+                "locationBtime": locationBtime,
+                "locationBdeliveryguy": locationBdeliveryguy,
+                "product": product,
+                "expirationdate": expirationdate,
+                "warehouseguy": warehouseguy,
+                "senderuid": senderuid,
+                "senderphonenumber": senderphonenumber,
+                "sendername": sendername,
+                "receiveruid": receiveruid,
+                "receiverphonenumber": receiverphonenumber,
+                "receivername": receivername
+            ]
+            
+            database.update(docId, rev: rev, document: JSON(json), callback: { (rev, doc, err) in
+                guard err == nil else {
+                    completion(nil, err)
+                    return
+                }
+                
+                completion(TransactionItem(docId: docId, status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy,senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername), nil)
+            })
+        }
+    }
+    
+    
     //query
     
     //manager
@@ -514,6 +586,8 @@ public class Materna: MaternaAPI {
         }
         return transactionArr
     }
+    
+
     
     
     

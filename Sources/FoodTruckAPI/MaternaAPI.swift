@@ -8,6 +8,8 @@ public protocol MaternaAPI {
     //transactions
     func addTransaction(status: String, locationA: String, locationAString: String, locationAtime: String, locationAdeliveryguy: String, warehouse: String, locationB: String, locationBString: String, locationBtime: String, locationBdeliveryguy: String, product: String, expirationdate: String, warehouseguy: String,senderuid: String, senderphonenumber: String, sendername: String, receiveruid: String, receiverphonenumber: String, receivername: String, completion: @escaping (TransactionItem?, Error?) -> Void)
     
+    func updateTransaction(docId: String,status: String?, locationA: String?, locationAString: String?, locationAtime: String?, locationAdeliveryguy: String?, warehouse: String?, locationB: String?, locationBString: String?, locationBtime: String?, locationBdeliveryguy: String?, product: String?, expirationdate: String?, warehouseguy: String?,senderuid: String?, senderphonenumber: String?, sendername: String?, receiveruid: String?, receiverphonenumber: String?, receivername: String?, completion: @escaping (TransactionItem?, Error?) -> Void)
+    
     //manager -
     func managerEye(warehouse : String, status: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
     

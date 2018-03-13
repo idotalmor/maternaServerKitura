@@ -30,6 +30,8 @@ public final class MaternaController {
     
     //transactionhandler
     router.post("\(transactionsPath)/add", handler: addTransaction)
+    router.post("\(transactionsPath)/update", handler: updateTransaction)
+
     
     //manager
     router.post("\(transactionsPath)/managereye", handler: managerEye)
@@ -240,6 +242,67 @@ public final class MaternaController {
                             }
                         }
         }
+    
+    
+    private func updateTransaction(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+
+        
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No Body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+
+        let docId: String? = json["id"].stringValue == "" ? nil : json["id"].stringValue
+
+        if docId == nil {return}
+        
+        let status: String? = json["status"].stringValue == "" ? nil : json["status"].stringValue
+        let locationA: String? = json["locationA"].stringValue == "" ? nil : json["locationA"].stringValue
+        let locationAString: String? = json["locationAString"].stringValue == "" ? nil : json["locationAString"].stringValue
+        let locationAtime: String? = json["locationAtime"].stringValue == "" ? nil : json["locationAtime"].stringValue
+        let locationAdeliveryguy: String? = json["locationAdeliveryguy"].stringValue == "" ? nil : json["locationAdeliveryguy"].stringValue
+        let warehouse: String? = json["warehouse"].stringValue == "" ? nil : json["warehouse"].stringValue
+        let locationB: String? = json["locationB"].stringValue == "" ? nil : json["locationB"].stringValue
+        let locationBString: String? = json["locationBString"].stringValue == "" ? nil : json["locationBString"].stringValue
+        let locationBtime: String? = json["locationBtime"].stringValue == "" ? nil : json["locationBtime"].stringValue
+        let locationBdeliveryguy: String? = json["locationBdeliveryguy"].stringValue == "" ? nil : json["locationBdeliveryguy"].stringValue
+        let product: String? = json["product"].stringValue == "" ? nil : json["product"].stringValue
+        let expirationdate: String? = json["expirationdate"].stringValue == "" ? nil : json["expirationdate"].stringValue
+        let warehouseguy: String? = json["warehouseguy"].stringValue == "" ? nil : json["warehouseguy"].stringValue
+        let senderuid: String? = json["senderuid"].stringValue == "" ? nil : json["senderuid"].stringValue
+        let senderphonenumber: String? = json["senderphonenumber"].stringValue == "" ? nil : json["senderphonenumber"].stringValue
+        let sendername: String? = json["sendername"].stringValue == "" ? nil : json["sendername"].stringValue
+        let receiveruid: String? = json["receiveruid"].stringValue == "" ? nil : json["receiveruid"].stringValue
+        let receiverphonenumber: String? = json["receiverphonenumber"].stringValue == "" ? nil : json["receiverphonenumber"].stringValue
+        let receivername: String? = json["receivername"].stringValue == "" ? nil : json["receivername"].stringValue
+
+
+        maternaapi.updateTransaction(docId: docId!,status: status, locationA: locationA, locationAString: locationAString, locationAtime: locationAtime, locationAdeliveryguy: locationAdeliveryguy, warehouse: warehouse, locationB: locationB, locationBString: locationBString, locationBtime: locationBtime, locationBdeliveryguy: locationBdeliveryguy, product: product, expirationdate: expirationdate, warehouseguy: warehouseguy,senderuid: senderuid, senderphonenumber: senderphonenumber, sendername: sendername, receiveruid: receiveruid, receiverphonenumber: receiverphonenumber, receivername: receivername) { (updatedTransaction, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let updatedTransaction = updatedTransaction {
+                    let result = JSON(updatedTransaction.toDict())
+                    try response.status(.OK).send(json: result).end()
+                } else {
+                    Log.error("Invalid Transaction Returned")
+                    try response.status(.badRequest).end()
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
 
     //Manager Queries
     
