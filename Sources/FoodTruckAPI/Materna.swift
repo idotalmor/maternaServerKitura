@@ -367,6 +367,121 @@ public class Materna: MaternaAPI {
         }
     }
     
+    //sender
+    
+//    function (doc) {
+//    if(doc.status == "5")
+//    emit(doc.senderuid, [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func senderDone(senderuid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("done", ofDesign: "Sender", usingParameters: [.keys([senderuid as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status != "5")
+//    emit(doc.senderuid, [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func senderInProgress(senderuid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("inProgress", ofDesign: "Sender", usingParameters: [.keys([senderuid as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status == "5")
+//    emit(doc.receiveruid, [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func receiverDone(receiveruid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("done", ofDesign: "Receiver", usingParameters: [.keys([receiveruid as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status != "5")
+//    emit(doc.receiveruid, [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+//
+    
+    public func receiverInProgress(receiveruid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("inProgress", ofDesign: "Receiver", usingParameters: [.keys([receiveruid as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status == "2")
+//    emit(doc.warehouse, [doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func donationList(warehouse : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("donationList", ofDesign: "Receiver", usingParameters: [.keys([warehouse as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+    
+    
     func parsetransaction(_ document: JSON) throws -> [TransactionItem] {
         guard let rows = document["rows"].array else {
             throw APICollectionError.ParseError

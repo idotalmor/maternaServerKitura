@@ -16,6 +16,17 @@ public protocol MaternaAPI {
     func locationAdeliveryguy(locationAdeliveryguy: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
     func locationBdeliveryguy(locationBdeliveryguy: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
 
+    //sender
+    func senderDone(senderuid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    func senderInProgress(senderuid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    
+    //Receiver
+    func receiverDone(receiveruid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    func receiverInProgress(receiveruid : String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    func donationList(warehouse : String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+
+    
+    
 
 
 

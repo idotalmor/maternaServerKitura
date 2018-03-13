@@ -38,7 +38,16 @@ public final class MaternaController {
     router.post("\(transactionsPath)/waitingfordelivery", handler: waitingForDelivery)
     router.post("\(transactionsPath)/locationadeliveryguy", handler: locationAdeliveryguy)
     router.post("\(transactionsPath)/locationbdeliveryguy", handler: locationBdeliveryguy)
-
+    
+    //sender
+    router.post("\(transactionsPath)/senderdone", handler: senderDone)
+    router.post("\(transactionsPath)/senderinprogress", handler: senderInProgress)
+    
+    //receiver
+    
+    router.post("\(transactionsPath)/receiverdone", handler: receiverDone)
+    router.post("\(transactionsPath)/receiverinprogress", handler: receiverInProgress)
+    router.post("\(transactionsPath)/donationlist", handler: donationList)
 
     // Food Truck Handling
     // All Trucks
@@ -391,6 +400,208 @@ public final class MaternaController {
             }
         }
     }
+    
+    //Sender Queries
+    
+    private func senderDone(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let senderuid: String = json["senderuid"].stringValue
+        
+        maternaapi.senderDone(senderuid : senderuid) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    private func senderInProgress(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let senderuid: String = json["senderuid"].stringValue
+        
+        maternaapi.senderInProgress(senderuid : senderuid) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    //Receiver Queries
+    
+    private func receiverDone(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let receiveruid: String = json["receiveruid"].stringValue
+        
+        maternaapi.receiverDone(receiveruid : receiveruid) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    
+    private func receiverInProgress(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let receiveruid: String = json["receiveruid"].stringValue
+        
+        maternaapi.receiverInProgress(receiveruid : receiveruid) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    private func donationList(request: RouterRequest, response: RouterResponse, next: () -> Void) {
+        guard let body = request.body else {
+            response.status(.badRequest)
+            Log.error("No body found in request")
+            return
+        }
+        
+        guard case let .json(json) = body else {
+            response.status(.badRequest)
+            Log.error("Invalid JSON data supplied")
+            return
+        }
+        
+        let warehouse: String = json["warehouse"].stringValue
+        
+        maternaapi.donationList(warehouse : warehouse) { (transactionArr, err) in
+            do {
+                guard err == nil else {
+                    try response.status(.badRequest).end()
+                    Log.error(err.debugDescription)
+                    return
+                }
+                if let userArr = transactionArr {
+                    //convert user array to json
+                    let result = JSON(userArr.toDict())
+                    
+                    //send json as a response
+                    try response.status(.OK).send(json:result).end()
+                } else {
+                    Log.warning("Could not find a review by that ID")
+                    response.status(.notFound)
+                    return
+                }
+            } catch {
+                Log.error("Communications Error")
+            }
+        }
+    }
+    
+    
     
     
     //#######
