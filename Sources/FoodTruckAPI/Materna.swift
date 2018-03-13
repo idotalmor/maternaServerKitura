@@ -299,6 +299,74 @@ public class Materna: MaternaAPI {
         }
     }
     
+    //Delivery
+    
+//    function (doc) {
+//    if(doc.status == "0" || doc.status == "3")
+//    emit(doc._id,[doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func waitingForDelivery(completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("waitingForDelivery", ofDesign: "Delivery", usingParameters: [.descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status == "1")
+//    emit(doc.locationAdeliveryguy,[doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+    
+    public func locationAdeliveryguy(locationAdeliveryguy : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("locationAdeliveryguy", ofDesign: "Delivery", usingParameters: [.keys([locationAdeliveryguy as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
+//    function (doc) {
+//    if(doc.status == "4")
+//    emit(doc.locationBdeliveryguy,[doc._id,doc.status,doc.locationA,doc.locationAString,doc.locationAtime,doc.locationAdeliveryguy,doc.warehouse,doc.locationB,doc.locationBString,doc.locationBtime,doc.locationBdeliveryguy,doc.product,doc.expirationdate,doc.warehouseguy,doc.senderuid,doc.senderphonenumber,doc.sendername,doc.receiveruid,doc.receiverphonenumber,doc.receivername]);
+//    }
+
+    public func locationBdeliveryguy(locationBdeliveryguy : String, completion: @escaping ([TransactionItem]?, Error?) -> Void) {
+        let couchClient = CouchDBClient(connectionProperties: connectionProps)
+        let database = couchClient.database(dbNameTransactions)
+        
+        database.queryByView("locationBdeliveryguy", ofDesign: "Delivery", usingParameters: [.keys([locationBdeliveryguy as Valuetype]), .descending(true), .includeDocs(true)]) { (doc, err) in
+            if let doc = doc, err == nil {
+                do {
+                    let TransArr = try self.parsetransaction(doc)
+                    completion(TransArr, nil)
+                } catch {
+                    completion(nil, err)
+                }
+            }
+            completion(nil, err)
+        }
+    }
+    
     func parsetransaction(_ document: JSON) throws -> [TransactionItem] {
         guard let rows = document["rows"].array else {
             throw APICollectionError.ParseError

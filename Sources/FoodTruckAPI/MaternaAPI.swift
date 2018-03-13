@@ -10,6 +10,13 @@ public protocol MaternaAPI {
     
     //manager -
     func managerEye(warehouse : String, status: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    
+    //delivery
+    func waitingForDelivery(completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    func locationAdeliveryguy(locationAdeliveryguy: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+    func locationBdeliveryguy(locationBdeliveryguy: String, completion: @escaping ([TransactionItem]?, Error?) -> Void)
+
+
 
 
   // MARK: - Trucks
