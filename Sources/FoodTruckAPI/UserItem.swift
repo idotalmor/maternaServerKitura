@@ -16,8 +16,9 @@ public struct UserItem {
     public let partneruid: String
     public let mail: String
     public let warehouse: String?
+    public let address: String?
 
-    public init(docId: String, permission: String, phonenumber: String, name: String, partneruid: String, mail: String, warehouse: String?) {
+    public init(docId: String, permission: String, phonenumber: String, name: String, partneruid: String, mail: String, warehouse: String?,address:String?) {
         self.docId = docId
         self.permission = permission
         self.phonenumber = phonenumber
@@ -25,6 +26,8 @@ public struct UserItem {
         self.partneruid = partneruid
         self.mail = mail
         self.warehouse = warehouse
+        self.address = address
+
     }
 }
 
@@ -36,7 +39,8 @@ extension UserItem: Equatable {
             lhs.name == rhs.name &&
             lhs.partneruid == rhs.partneruid &&
             lhs.mail == rhs.mail &&
-        lhs.warehouse == rhs.warehouse
+        lhs.warehouse == rhs.warehouse &&
+            lhs.address == rhs.address
     }
 }
 
@@ -50,6 +54,7 @@ extension UserItem: DictionaryConvertible {
         result["partneruid"] = self.partneruid
         result["mail"] = self.mail
         result["warehouse"] = self.warehouse
+        result["address"] = self.address
         return result
     }
 }

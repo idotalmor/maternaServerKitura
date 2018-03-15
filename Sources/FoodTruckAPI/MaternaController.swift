@@ -148,6 +148,8 @@ public final class MaternaController {
         let partneruid: String = json["partneruid"].stringValue
         let mail: String = json["mail"].stringValue
         let warehouse: String = json["warehouse"].stringValue
+        let address: String = json["address"].stringValue
+
 
         guard name != "" else {
             response.status(.badRequest)
@@ -155,7 +157,7 @@ public final class MaternaController {
             return
         }
 
-        maternaapi.addUser(permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse) { (user, err) in
+        maternaapi.addUser(permission: permission, phonenumber: phonenumber, Password: Password, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse,address: address) { (user, err) in
             do {
                 guard err == nil else {
                     try response.status(.badRequest).end()

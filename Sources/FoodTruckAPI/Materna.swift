@@ -165,7 +165,7 @@ public class Materna: MaternaAPI {
     
     
     //Add User
-    public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String,warehouse: String?, completion: @escaping (UserItem?, Error?) -> Void) {
+    public func addUser(permission: String, phonenumber: String, Password: String, name: String, partneruid: String, mail: String,warehouse: String?, address:String?, completion: @escaping (UserItem?, Error?) -> Void) {
         let json: [String:Any] = [
             "permission": permission,
             "phonenumber": phonenumber,
@@ -173,7 +173,8 @@ public class Materna: MaternaAPI {
             "name": name,
             "partneruid": partneruid,
             "mail": mail,
-            "warehouse" : warehouse
+            "warehouse" : warehouse,
+            "address" : address
             
         ]
         
@@ -182,7 +183,7 @@ public class Materna: MaternaAPI {
         
         database.create(JSON(json)) { (id, rev, doc, err) in
             if let id = id {
-                let User = UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse)
+                let User = UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse,address: address)
                 completion(User, nil)
             } else {
                 completion(nil, err)
@@ -195,7 +196,7 @@ public class Materna: MaternaAPI {
     //login func
 //    function(doc) {
 //    if (doc.phonenumber && doc.Password){
-//    emit([doc.phonenumber,doc.Password], [doc._id,doc.permission,doc.partneruid,doc.name,doc.mail,doc.phonenumber]);
+//    emit([doc.phonenumber,doc.Password], [doc._id,doc.permission,doc.partneruid,doc.name,doc.mail,doc.phonenumber,doc.address]);
 //    }
 //    }
     public func loginUser(phonenumber : String, Password: String, completion: @escaping ([UserItem]?, Error?) -> Void) {
@@ -230,7 +231,9 @@ public class Materna: MaternaAPI {
                 let phonenumber = doc[5].string
                 else {return nil}
             let warehouse = doc[6].string
-            return UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse)
+            let address = doc[7].string
+
+            return UserItem(docId: id, permission: permission, phonenumber: phonenumber, name: name, partneruid: partneruid, mail: mail, warehouse: warehouse,address: address)
         }
         return userArr
     }
